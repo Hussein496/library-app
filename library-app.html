@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LibraryApp</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #0f6e56;
+    --green-dark: #085041;
+    --green-lt: #e1f5ee;
+    --green-mid: #1d9e75;
+    --red: #993c1d;
+    --red-lt: #faece7;
+    --blue: #185fa5;
+    --blue-lt: #e6f1fb;
+    --bg: #f5f5f2;
+    --card: #ffffff;
+    --border: #e0ddd8;
+    --text: #1a1a18;
+    --muted: #6b6a66;
+    --amber: #854f0b;
+    --amber-lt: #faeeda;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  nav {
+    background: var(--green);
+    height: 60px; padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .brand { color: white; font-family: 'DM Serif Display', serif; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links button { background: none; border: none; color: rgba(255,255,255,0.85); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; padding: 0; }
+  .nav-links button:hover { color: white; }
+  .nav-links .nav-btn { background: white; color: var(--green); padding: 0.4rem 1.1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
+  .nav-links .nav-btn:hover { background: #f0faf6; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+  /* HERO */
+  .hero { background: var(--green); color: white; padding: 3rem 2rem 2.5rem; text-align: center; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: 2.4rem; margin-bottom: 0.5rem; }
+  .hero p { opacity: 0.85; font-size: 1rem; margin-bottom: 2rem; }
+
+  /* SEARCH */
+  .search-wrap { max-width: 600px; margin: 0 auto; display: flex; gap: 0.5rem; }
+  .search-wrap input { flex: 1; padding: 0.75rem 1.1rem; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; }
+  .search-wrap input:focus { outline: 2px solid var(--green-mid); }
+  .btn { background: var(--green-dark); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .btn:hover { background: #063d30; }
+  .btn-outline { background: transparent; color: var(--green); border: 1.5px solid var(--green); padding: 0.6rem 1.3rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-outline:hover { background: var(--green-lt); }
+  .btn-red { background: var(--red-lt); color: var(--red); border: none; padding: 0.5rem 1rem; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-btn { background: white; border: 1px solid var(--border); padding: 0.35rem 0.85rem; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .filter-btn.active, .filter-btn:hover { background: var(--green-lt); border-color: var(--green); color: var(--green); font-weight: 600; }
+
+  /* BOOK LIST */
+  .book-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .book-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; text-align: left; width: 100%; font-family: 'DM Sans', sans-serif; }
+  .book-row:hover { border-color: var(--green); box-shadow: 0 2px 8px rgba(15,110,86,0.08); }
+  .book-cover { width: 38px; height: 52px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .book-info { flex: 1; min-width: 0; }
+  .book-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .book-author { color: var(--muted); font-size: 0.83rem; margin-top: 0.15rem; }
+  .book-meta { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+  .book-loc { color: var(--muted); font-size: 0.78rem; font-family: monospace; }
+
+  /* BADGES */
+  .badge { padding: 0.22rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .badge-in  { background: var(--green-lt); color: var(--green); }
+  .badge-out { background: var(--red-lt);   color: var(--red); }
+  .badge-res { background: var(--amber-lt); color: var(--amber); }
+
+  /* CARDS */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem; margin-bottom: 1rem; }
+
+  /* DETAIL PAGE */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1.5rem; margin: 1.25rem 0; }
+  .detail-row { display: contents; }
+  .detail-label { color: var(--muted); font-size: 0.85rem; }
+  .detail-val { font-size: 0.9rem; font-weight: 500; }
+
+  /* AUTH FORMS */
+  .auth-wrap { max-width: 420px; margin: 2.5rem auto; }
+  .auth-wrap h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .auth-wrap .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1.1rem; }
+  .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-group input { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; background: var(--bg); transition: border-color 0.15s; }
+  .form-group input:focus { outline: none; border-color: var(--green); background: white; }
+  .btn-full { width: 100%; padding: 0.8rem; border-radius: 8px; font-size: 0.95rem; }
+  .error-msg { background: var(--red-lt); color: var(--red); padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
+  .auth-switch { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--muted); }
+  .auth-switch span { color: var(--green); font-weight: 600; cursor: pointer; }
+  .auth-switch span:hover { text-decoration: underline; }
+
+  /* ACCOUNT */
+  .account-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--green-lt); color: var(--green); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+  .section-title { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.75rem; }
+
+  /* PAGE HEADING */
+  .page-head { margin-bottom: 1.5rem; }
+  .page-head h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; }
+  .page-head p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a1a18; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 600px) {
+    .book-loc { display: none; }
+    .detail-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 1rem; }
+    .hero { padding: 2rem 1rem; }
+    .hero h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand" onclick="showPage('home')">📚 LibraryApp</div>
+  <div class="nav-links" id="navLinks">
+    <button onclick="showPage('home')">Search</button>
+    <button onclick="showPage('account')" id="navAccount" style="display:none">My Account</button>
+    <button onclick="logout()" id="navLogout" style="display:none">Sign out</button>
+    <button onclick="showPage('login')" id="navLogin">Sign in</button>
+    <button class="nav-btn" onclick="showPage('signup')" id="navSignup">Register</button>
+  </div>
+</nav>
+
+<!-- ── HOME PAGE ─────────────────────────────────────────── -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>Find your next read</h1>
+    <p>Search our full catalogue. Sign in to reserve books.</p>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search by title or author..." oninput="filterBooks()">
+      <button class="btn" onclick="filterBooks()">Search</button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All formats</button>
+      <button class="filter-btn" onclick="setFilter('PB', this)">Paperback</button>
+      <button class="filter-btn" onclick="setFilter('LP', this)">Large Print</button>
+      <button class="filter-btn" onclick="setFilter('ACD', this)">Audio CD</button>
+      <button class="filter-btn" onclick="setFilter('ADIG', this)">Audio Digital</button>
+      <button class="filter-btn active-avail" onclick="toggleAvail(this)" style="margin-left:auto">Available only</button>
+    </div>
+    <div class="book-list" id="bookList"></div>
+  </div>
+</div>
+
+<!-- ── BOOK DETAIL ────────────────────────────────────────── -->
+<div class="page" id="page-detail">
+  <div class="container">
+    <button class="btn-outline" onclick="showPage('home')" style="margin-bottom:1.5rem">← Back to search</button>
+    <div class="card" id="detailCard"></div>
+  </div>
+</div>
+
+<!-- ── LOGIN PAGE ─────────────────────────────────────────── -->
+<div class="page" id="page-login">
+  <div class="container">
+    <div class="auth-wrap">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to your account</p>
+      <div class="card">
+        <div id="loginError" class="error-msg" style="display:none"></div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn btn-full" onclick="doLogin()">Sign in</button>
+        <div class="auth-switch">No account? <span onclick="showPage('signup')">Create one</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIGNUP PAGE ────────────────────────────────────────── -->
+<div class="page" id="page-signup">
+  <div class="container">
+    <div class="auth-wrap">
+      <h1>Create account</h1>
+      <p class="sub">Join to borrow and reserve books</p>
+      <div class="card">
+        <div id="signupError" class="error-msg" style="display:none"></div>
+        <div class="form-group">
+          <label>Full name</label>
+          <input type="text" id="signupName" placeholder="Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" id="signupEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Home address</label>
+          <input type="text" id="signupAddress" placeholder="123 Example Street">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Choose a password" onkeydown="if(event.key==='Enter')doSignup()">
+        </div>
+        <button class="btn btn-full" onclick="doSignup()">Create account</button>
+        <div class="auth-switch">Already have an account? <span onclick="showPage('login')">Sign in</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT PAGE ───────────────────────────────────────── -->
+<div class="page" id="page-account">
+  <div class="container">
+    <div class="account-header">
+      <div class="avatar" id="accountAvatar"></div>
+      <div>
+        <div style="font-weight:700;font-size:1.1rem" id="accountName"></div>
+        <div style="color:var(--muted);font-size:0.85rem" id="accountEmail"></div>
+      </div>
+    </div>
+    <div class="section-title">My Reservations</div>
+    <div id="reservationList"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────
+const BOOKS = [
+  { id:1,  title:'4:50 From Paddington',           author:'Agatha Christie',       fmt:'PB',   loc:'F1-B09-S05', color:'#e8f4f0' },
+  { id:2,  title:'Pride and Prejudice',             author:'Jane Austen',           fmt:'PB',   loc:'F1-B03-S02', color:'#f0e8f4' },
+  { id:3,  title:'The Hobbit',                      author:'J.R.R. Tolkien',        fmt:'PB',   loc:'F2-B01-S01', color:'#f4f0e8' },
+  { id:4,  title:'1984',                            author:'George Orwell',         fmt:'PB',   loc:'F1-B05-S03', color:'#e8eef4' },
+  { id:5,  title:'To Kill a Mockingbird',           author:'Harper Lee',            fmt:'PB',   loc:'F1-B07-S01', color:'#f4e8e8' },
+  { id:6,  title:'The Great Gatsby',                author:'F. Scott Fitzgerald',   fmt:'PB',   loc:'F2-B02-S04', color:'#e8f4f4' },
+  { id:7,  title:'Brave New World',                 author:'Aldous Huxley',         fmt:'PB',   loc:'F1-B05-S06', color:'#f4f4e8' },
+  { id:8,  title:'Jane Eyre',                       author:'Charlotte Bronte',      fmt:'LP',   loc:'F1-B03-S05', color:'#f0e8f4' },
+  { id:9,  title:'Wuthering Heights',               author:'Emily Bronte',          fmt:'LP',   loc:'F1-B03-S06', color:'#e8f4f0' },
+  { id:10, title:'Great Expectations',              author:'Charles Dickens',       fmt:'PB',   loc:'F1-B04-S02', color:'#f4ece8' },
+  { id:11, title:'The Catcher in the Rye',          author:'J.D. Salinger',         fmt:'PB',   loc:'F2-B03-S01', color:'#e8eef4' },
+  { id:12, title:'Of Mice and Men',                 author:'John Steinbeck',        fmt:'PB',   loc:'F1-B06-S04', color:'#f4e8ee' },
+  { id:13, title:'Lord of the Flies',               author:'William Golding',       fmt:'PB',   loc:'F1-B05-S02', color:'#eef4e8' },
+  { id:14, title:'The Alchemist',                   author:'Paulo Coelho',          fmt:'PB',   loc:'F2-B04-S03', color:'#f4f0e8' },
+  { id:15, title:"Harry Potter and the Philosopher's Stone", author:'J.K. Rowling', fmt:'PB',   loc:'F3-B01-S01', color:'#e8f0f4' },
+  { id:16, title:'Agatha Christie: An Autobiography', author:'Agatha Christie',    fmt:'ACD',  loc:'F0-B20-S01', color:'#f4e8f0' },
+  { id:17, title:'Sense and Sensibility',           author:'Jane Austen',           fmt:'LP',   loc:'F1-B03-S03', color:'#e8f4ee' },
+  { id:18, title:'Animal Farm',                     author:'George Orwell',         fmt:'PB',   loc:'F1-B05-S04', color:'#f4ebe8' },
+  { id:19, title:'Rebecca',                         author:'Daphne du Maurier',     fmt:'PB',   loc:'F1-B08-S02', color:'#e8ecf4' },
+  { id:20, title:'The Secret Garden',               author:'Frances Hodgson Burnett',fmt:'ADIG',loc:'F0-B21-S03', color:'#eef4e8' },
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let state = {
+  availability: JSON.parse(localStorage.getItem('availability') || '{}'),
+  users: JSON.parse(localStorage.getItem('users') || '[]'),
+  reservations: JSON.parse(localStorage.getItem('reservations') || '[]'),
+  currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
+  filterFmt: 'all',
+  filterAvail: false,
+};
+
+function save() {
+  localStorage.setItem('availability',  JSON.stringify(state.availability));
+  localStorage.setItem('users',         JSON.stringify(state.users));
+  localStorage.setItem('reservations',  JSON.stringify(state.reservations));
+  localStorage.setItem('currentUser',   JSON.stringify(state.currentUser));
+}
+
+function isAvailable(bookId) {
+  return state.availability[bookId] !== false;
+}
+
+// ── PAGES ──────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'home')    renderBooks();
+  if (name === 'account') renderAccount();
+  updateNav();
+}
+
+function updateNav() {
+  const u = state.currentUser;
+  document.getElementById('navAccount').style.display = u ? 'inline' : 'none';
+  document.getElementById('navLogout').style.display  = u ? 'inline' : 'none';
+  document.getElementById('navLogin').style.display   = u ? 'none'   : 'inline';
+  document.getElementById('navSignup').style.display  = u ? 'none'   : 'inline';
+}
+
+// ── BOOK LIST ──────────────────────────────────────────────────
+function filterBooks() { renderBooks(); }
+
+function setFilter(fmt, btn) {
+  state.filterFmt = fmt;
+  document.querySelectorAll('.filter-btn:not(.active-avail)').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBooks();
+}
+
+function toggleAvail(btn) {
+  state.filterAvail = !state.filterAvail;
+  btn.style.background   = state.filterAvail ? 'var(--green-lt)' : '';
+  btn.style.borderColor  = state.filterAvail ? 'var(--green)' : '';
+  btn.style.color        = state.filterAvail ? 'var(--green)' : '';
+  btn.style.fontWeight   = state.filterAvail ? '600' : '';
+  renderBooks();
+}
+
+function renderBooks() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  let books = BOOKS.filter(b => {
+    const matchQ    = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
+    const matchFmt  = state.filterFmt === 'all' || b.fmt === state.filterFmt;
+    const matchAvail = !state.filterAvail || isAvailable(b.id);
+    return matchQ && matchFmt && matchAvail;
+  });
+
+  const list = document.getElementById('bookList');
+  if (books.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">📭</div><p>No books found.</p></div>';
+    return;
+  }
+
+  const fmtLabel = { PB:'Paperback', LP:'Large Print', ACD:'Audio CD', ADIG:'Audio Digital', EBK:'Ebook' };
+  list.innerHTML = books.map(b => {
+    const avail = isAvailable(b.id);
+    return `
+      <button class="book-row" onclick="showDetail(${b.id})">
+        <div class="book-cover" style="background:${b.color}">📖</div>
+        <div class="book-info">
+          <div class="book-title">${b.title}</div>
+          <div class="book-author">${b.author}</div>
+        </div>
+        <div class="book-meta">
+          <span class="book-loc">${b.loc}</span>
+          <span style="color:var(--muted);font-size:0.78rem">${fmtLabel[b.fmt]||b.fmt}</span>
+          <span class="badge ${avail ? 'badge-in' : 'badge-out'}">${avail ? 'Available' : 'On loan'}</span>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+// ── BOOK DETAIL ────────────────────────────────────────────────
+function showDetail(id) {
+  const b = BOOKS.find(x => x.id === id);
+  if (!b) return;
+  const avail = isAvailable(b.id);
+  const fmtLabel = { PB:'Paperback', LP:'Large Print', ACD:'Audio CD', ADIG:'Audio Digital', EBK:'Ebook' };
+  const u = state.currentUser;
+
+  let action = '';
+  if (u) {
+    if (avail) {
+      action = `<button class="btn" onclick="reserveBook(${b.id})" style="margin-top:1.5rem">Reserve this book</button>`;
+    } else {
+      action = `<p style="color:var(--muted);font-size:0.9rem;margin-top:1.5rem">This book is currently on loan.</p>`;
+    }
+  } else {
+    action = `<p style="color:var(--muted);font-size:0.9rem;margin-top:1.5rem">
+      <span style="color:var(--green);font-weight:600;cursor:pointer" onclick="showPage('login')">Sign in</span> to reserve this book.</p>`;
+  }
+
+  document.getElementById('detailCard').innerHTML = `
+    <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap">
+      <div style="width:80px;height:110px;border-radius:8px;background:${b.color};display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">📖</div>
+      <div style="flex:1;min-width:200px">
+        <h1 style="font-family:'DM Serif Display',serif;font-size:1.6rem;margin-bottom:0.3rem">${b.title}</h1>
+        <p style="color:var(--muted);margin-bottom:1.25rem">${b.author}</p>
+        <div class="detail-grid">
+          <span class="detail-label">Format</span>     <span class="detail-val">${fmtLabel[b.fmt]||b.fmt}</span>
+          <span class="detail-label">Location</span>   <span class="detail-val" style="font-family:monospace">${b.loc}</span>
+          <span class="detail-label">Status</span>     <span class="detail-val"><span class="badge ${avail?'badge-in':'badge-out'}">${avail?'Available':'On loan'}</span></span>
+        </div>
+        ${action}
+      </div>
+    </div>`;
+  showPage('detail');
+}
+
+// ── RESERVE ────────────────────────────────────────────────────
+function reserveBook(bookId) {
+  const u = state.currentUser;
+  if (!u) { showPage('login'); return; }
+  state.availability[bookId] = false;
+  state.reservations.push({ userId: u.email, bookId, date: new Date().toLocaleDateString('en-GB') });
+  save();
+  showToast('✅ Book reserved! Check My Account.');
+  setTimeout(() => showPage('account'), 1200);
+}
+
+// ── AUTH ───────────────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const user  = state.users.find(u => u.email === email && u.password === pass);
+  if (!user) {
+    errEl.textContent = 'Wrong email or password.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  state.currentUser = user;
+  save();
+  updateNav();
+  showToast('👋 Welcome back, ' + user.name + '!');
+  showPage('home');
+}
+
+function doSignup() {
+  const name    = document.getElementById('signupName').value.trim();
+  const email   = document.getElementById('signupEmail').value.trim();
+  const address = document.getElementById('signupAddress').value.trim();
+  const pass    = document.getElementById('signupPassword').value;
+  const errEl   = document.getElementById('signupError');
+
+  if (!name || !email || !address || !pass) {
+    errEl.textContent = 'All fields are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (state.users.find(u => u.email === email)) {
+    errEl.textContent = 'An account with that email already exists.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  const user = { name, email, address, password: pass };
+  state.users.push(user);
+  state.currentUser = user;
+  save();
+  updateNav();
+  showToast('🎉 Account created! Welcome, ' + name + '!');
+  showPage('home');
+}
+
+function logout() {
+  state.currentUser = null;
+  save();
+  updateNav();
+  showToast('Signed out.');
+  showPage('home');
+}
+
+// ── ACCOUNT ────────────────────────────────────────────────────
+function renderAccount() {
+  const u = state.currentUser;
+  if (!u) { showPage('login'); return; }
+
+  document.getElementById('accountAvatar').textContent = u.name.charAt(0).toUpperCase();
+  document.getElementById('accountName').textContent  = u.name;
+  document.getElementById('accountEmail').textContent = u.email;
+
+  const myRes = state.reservations.filter(r => r.userId === u.email);
+  const list  = document.getElementById('reservationList');
+
+  if (myRes.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="icon">📚</div><p>No reservations yet. <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="showPage('home')">Find a book</span></p></div>`;
+    return;
+  }
+
+  list.innerHTML = myRes.map(r => {
+    const b = BOOKS.find(x => x.id === r.bookId);
+    if (!b) return '';
+    return `
+      <div class="card" style="display:flex;align-items:center;gap:1rem;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <div style="width:40px;height:55px;border-radius:6px;background:${b.color};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">📖</div>
+          <div>
+            <div style="font-weight:600">${b.title}</div>
+            <div style="color:var(--muted);font-size:0.83rem">${b.author}</div>
+            <div style="color:var(--muted);font-size:0.78rem;margin-top:0.2rem">Reserved ${r.date}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem">
+          <span class="badge badge-res">Reserved</span>
+          <button class="btn-red" onclick="cancelReservation(${r.bookId})">Cancel</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function cancelReservation(bookId) {
+  const u = state.currentUser;
+  state.reservations = state.reservations.filter(r => !(r.userId === u.email && r.bookId === bookId));
+  state.availability[bookId] = true;
+  save();
+  showToast('Reservation cancelled.');
+  renderAccount();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+updateNav();
+renderBooks();
+</script>
+</body>
+</html>
